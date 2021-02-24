@@ -15,7 +15,7 @@ echo 'complete -F __start_kubectl k' >> ~/.bashrc
 sed -i '1s/^/force_color_prompt=yes\n/' ~/.bashrc
 
 
-### install k8s and docker
+### install k8s and containerd
 apt-get remove -y docker.io kubelet kubeadm kubectl kubernetes-cni
 apt-get autoremove -y
 apt-get install -y etcd-client vim build-essential
@@ -27,26 +27,26 @@ deb http://apt.kubernetes.io/ kubernetes-xenial main
 EOF
 KUBE_VERSION=1.20.2
 apt-get update
-apt-get install -y docker.io kubelet=${KUBE_VERSION}-00 kubeadm=${KUBE_VERSION}-00 kubectl=${KUBE_VERSION}-00 kubernetes-cni=0.8.7-00
+apt-get install -y containerd apt-transport-https kubelet=${KUBE_VERSION}-00 kubeadm=${KUBE_VERSION}-00 kubectl=${KUBE_VERSION}-00 kubernetes-cni=0.8.7-00
+mkdir /etc/containerd
+containerd config default > /etc/containerd/config.toml
+systemctl restart containerd
+systemctl enable containerd >/dev/null 2>&1
 
-cat > /etc/docker/daemon.json <<EOF
-{
-  "exec-opts": ["native.cgroupdriver=systemd"],
-  "log-driver": "json-file",
-  "storage-driver": "overlay2"
-}
+### Enable and Load Kernel modules
+cat >> /etc/modules-load.d/containerd.conf<<EOF
+overlay
+br_netfilter
 EOF
-mkdir -p /etc/systemd/system/docker.service.d
+modprobe overlay
+modprobe br_netfilter
 
-# Restart docker.
-systemctl daemon-reload
-systemctl restart docker
-
-# start docker on reboot
-systemctl enable docker
-
-docker info | grep -i "storage"
-docker info | grep -i "cgroup"
+cat >>/etc/sysctl.d/kubernetes.conf<<EOF
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables  = 1
+net.ipv4.ip_forward                 = 1
+EOF
+sysctl --system >/dev/null 2>&1
 
 systemctl enable kubelet && systemctl start kubelet
 
