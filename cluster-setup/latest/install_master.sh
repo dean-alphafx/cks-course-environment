@@ -16,7 +16,7 @@ sed -i '1s/^/force_color_prompt=yes\n/' ~/.bashrc
 
 
 ### install k8s and containerd
-apt-get remove -y docker.io kubelet kubeadm kubectl kubernetes-cni
+apt-get remove -y containerd apt-transport-https docker.io kubelet kubeadm kubectl kubernetes-cni
 apt-get autoremove -y
 apt-get install -y etcd-client vim build-essential
 
