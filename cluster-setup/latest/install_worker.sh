@@ -55,7 +55,6 @@ echo "deb https://dl.bintray.com/falcosecurity/deb stable main" | tee -a /etc/ap
 apt-get update -y
 apt-get -y install linux-headers-$(uname -r)
 apt-get install -y falco
-systemctl start falco
 
 ### init k8s
 kubeadm reset -f
@@ -66,3 +65,5 @@ echo
 echo "EXECUTE ON MASTER: kubeadm token create --print-join-command --ttl 0"
 echo "THEN RUN THE OUTPUT AS COMMAND HERE TO ADD AS WORKER"
 echo
+
+systemctl start falco
