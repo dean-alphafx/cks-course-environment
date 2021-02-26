@@ -55,7 +55,6 @@ echo "deb https://dl.bintray.com/falcosecurity/deb stable main" | tee -a /etc/ap
 apt-get update -y
 apt-get -y install linux-headers-$(uname -r)
 apt-get install -y falco
-systemctl start falco
 
 ### init k8s
 rm /root/.kube/config
@@ -70,3 +69,5 @@ kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl versio
 echo
 echo "### COMMAND TO ADD A WORKER NODE ###"
 kubeadm token create --print-join-command --ttl 0
+
+systemctl start falco
